@@ -3,3 +3,9 @@ export type TranslatorInput = {
   target: string;
   source?: string;
 };
+
+export type TranslatorResponse = Array<{
+  translation: string;
+  original: string;
+  detectedLanguage: string;
+}>;
