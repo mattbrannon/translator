@@ -1,8 +1,4 @@
-export type Input = {
-  text: string | string[];
-  target: string;
-  source?: string;
-};
+import { TranslatorInput } from "./shared";
 
 export type Config = {
   formality?: "default" | "prefer_less" | "prefer_more" | "more" | "less";
@@ -24,7 +20,10 @@ export type DeepLResponse = {
 
 export type DeepLTranslator = {
   name: string;
-  translate: (input: Input, config?: Config) => Promise<TranslatorResponse>;
+  translate: (
+    input: TranslatorInput,
+    config?: Config
+  ) => Promise<TranslatorResponse>;
   sourceLanguages: () => Promise<string[]>;
   targetLanguages: () => Promise<string[]>;
 };
