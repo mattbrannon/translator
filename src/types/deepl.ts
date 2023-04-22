@@ -1,6 +1,6 @@
 import { TranslatorInput, TranslatorResponse } from "./shared";
 
-export type Config = {
+export type DeepLConfig = {
   formality?: "default" | "prefer_less" | "prefer_more" | "more" | "less";
   ignoreRegex?: RegExp[];
   tagHandling?: "xml" | "html";
@@ -16,7 +16,7 @@ export type DeepLTranslator = {
   name: string;
   translate: (
     input: TranslatorInput,
-    config?: Config
+    config?: DeepLConfig
   ) => Promise<TranslatorResponse>;
   sourceLanguages: () => Promise<string[]>;
   targetLanguages: () => Promise<string[]>;
