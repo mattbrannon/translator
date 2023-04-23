@@ -18,7 +18,8 @@ export function makeDeepL() {
   };
 
   const getLanguages = async (type: "source" | "target") => {
-    const url = `${endpoints.languages}?type=${type}`;
+    const endpoint = `${endpoints.languages}?type=${type}`;
+    const url = new URL(endpoint, baseUrl);
     const response = await fetch(url, { headers });
     const json = await response.json();
     return json;
