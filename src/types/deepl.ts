@@ -17,22 +17,34 @@ export type DeepLResponse = {
   translations: [{ text: string; detected_source_language: string }];
 };
 
-export type MethodDeepLTranslate = (
+type MethodDeepLTranslate = (
   input: TranslatorInput,
   config?: DeepLConfig
 ) => Promise<TranslatorResponse>;
 
-export type MethodDeepLLanguages = () => Promise<string[]>;
+type MethodDeepLSourceLanguages = () => Promise<
+  [{ language: string; name: string }]
+>;
 
-export type MethodDeepLUsage = () => Promise<{
+type MethodDeepLTargetLanguages = () => Promise<
+  [
+    {
+      language: string;
+      name: string;
+      supports_formality: boolean;
+    }
+  ]
+>;
+
+type MethodDeepLUsage = () => Promise<{
   character_count: number;
   character_limit: number;
 }>;
 
-export type DeepLTranslator = {
+export interface DeepLTranslator {
   name: "deepL";
   translate: MethodDeepLTranslate;
-  sourceLanguages: MethodDeepLLanguages;
-  targetLanguages: MethodDeepLLanguages;
+  sourceLanguages: MethodDeepLSourceLanguages;
+  targetLanguages: MethodDeepLTargetLanguages;
   usage: MethodDeepLUsage;
-};
+}
