@@ -28,7 +28,22 @@ export function makeDeepL(): DeepLTranslator {
     name: "deepL",
     sourceLanguages: async () => await getLanguages("source"),
     targetLanguages: async () => await getLanguages("target"),
+
+    async usage() {
+      const method = "GET";
+      const endpoint = endpoints.usage;
+      try {
+        const url = new URL(endpoint, baseUrl);
+        const response = await fetch(url, { method, headers });
+        const json = await response.json();
+        return json;
+      }
+      catch (error) {
+        console.error(error);
+        return error;
+      }
+    },
+
     async translate({ text, target, source }, config) {},
-    async usage() {},
   };
 }
