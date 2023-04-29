@@ -1,69 +1,13 @@
-// import { env } from "../../env";
-// const { deepL } = env;
-// import { DeepLResponse, DeepLTranslator } from "./types";
-import { appendText, appendConfig, setInputText, getOutput } from "./utils";
-
-import { DeepL } from "./types";
-
-type DeepLResponse = {
-  translations: [{ text: string; detected_source_language: string }];
-};
-
-const getConfig = ({
-  config,
-  source,
-  inputText,
-  target,
-}: {
-  config?: DeepL.Config;
-  source?: string;
-  inputText: string[];
-  target: string;
-}) => {
-  const defaultConfig: DeepL.Config = {
-    formality: "default",
-    tagHandling: "xml",
-    ignoreTags: "ignore",
-    splitSentences: "nonewlines",
-    preserveFormatting: "0",
-    ignore: {
-      unicode: ["Emoji_Presentation"],
-      regex: [],
-    },
-  };
-
-  const params = new URLSearchParams({
-    ignore_tags: (config?.ignoreTags || defaultConfig.ignoreTags) as string,
-    tag_handling: (config?.tagHandling || defaultConfig.tagHandling) as string,
-    formality: (config?.formality || defaultConfig.formality) as string,
-    split_sentences: (config?.splitSentences ||
-      defaultConfig.splitSentences) as string,
-    preserve_formatting: (config?.preserveFormatting ||
-      defaultConfig.preserveFormatting) as string,
-    target_lang: target,
-  });
-
-  inputText.forEach((text) => params.append("text", text));
-
-  if (source) {
-    params.append("source_lang", source);
-    // params.source_lang = source;
-  }
-
-  return params;
-
-  // let params = new URLSearchParams({
-  //   target_lang: target,
-  //   ignore_tags: ignoreTags as string,
-  //   tag_handling: tagHandling as DeepL.TagHandling,
-  //   formality: formality as DeepL.Formality,
-  //   split_sentences: splitSentences as DeepL.SplitSentences,
-  //   preserve_formatting: preserveFormatting as string,
-  // });
-};
+import type { DeepL } from "./types";
+import type { Translate } from "../types";
+import {
+  setSearchParams,
+  setInputText,
+  parseResponse,
+  getResult,
+} from "../utils";
 
 export function makeDeepL(apiKey?: string) {
-  // const baseUrl = deepL.endpoint;
   const baseUrl = "https://api-free.deepl.com";
   const endpoints = {
     translate: `/v2/translate`,
@@ -84,91 +28,101 @@ export function makeDeepL(apiKey?: string) {
     return json;
   };
 
-  const defaultConfig: DeepL.Config = {
-    formality: "default",
-    tagHandling: "xml",
-    ignoreTags: "ignore",
-    splitSentences: "nonewlines",
-    preserveFormatting: "0",
-    ignore: {
-      unicode: [],
-      regex: [],
-    },
-    join: false,
+  const getURL = ({ text, target, source, options }: DeepL.Input) => {
+    const url = new URL(endpoints.translate, baseUrl);
+
+    const hasRegex = () => {
+      return !!(
+        options?.ignore?.regex?.length || options?.ignore?.unicode?.length
+      );
+    };
+
+    const setTags = () => {
+      if (!hasRegex()) return;
+
+      const ignoreTags = Array.isArray(options?.ignoreTags)
+        ? [ ...(options?.ignoreTags as []), "ignore" ]
+        : [ options?.ignoreTags, "ignore" ];
+
+      const tags = [...new Set(ignoreTags.filter((v) => v))];
+      console.log({ tags });
+
+      return tags;
+      // return [...new Set(ignoreTags.filter((v) => v))];
+    };
+
+    const snakeCasedOptions = Object.fromEntries(
+      Object.entries(options || {}).map(([ k, v ]) => [
+        k.replace(/([A-Z])/g, "_$1").toLowerCase(),
+        v,
+      ])
+    );
+
+    const params = setSearchParams({
+      ...snakeCasedOptions,
+      source_lang: source,
+      target_lang: target,
+      tag_handling: "xml",
+      ignore_tags: "ignore",
+      text: setInputText(text, options?.ignore, "deepl"),
+    });
+
+    url.search = params.toString();
+
+    return url;
   };
 
   return {
     name: "deepL",
-    sourceLanguages: async () => await getLanguages("source"),
-    targetLanguages: async () => await getLanguages("target"),
+    languages: {
+      async source(): Promise<DeepL.LanguageResponse> {
+        return await getLanguages("source");
+      },
+      async target(): Promise<DeepL.LanguageResponse> {
+        return await getLanguages("target");
+      },
+    },
 
-    async translate(
-      { text, target, source }: DeepL.Input,
-      config?: DeepL.Config
-    ) {
+    async translate({
+      text,
+      target,
+      source,
+      options,
+    }: DeepL.Input): Translate.Output {
       try {
-        const ignore = config?.ignore || defaultConfig.ignore || {};
-        const join = config?.join || defaultConfig.join || false;
-        // const tagHandling = config?.tagHandling || defaultConfig.tagHandling;
-        // const formality = config?.formality || defaultConfig.formality;
-        // const ignoreTags = config?.ignoreTags || defaultConfig.ignoreTags;
-        // const preserveFormatting =
-        //   config?.preserveFormatting || defaultConfig.preserveFormatting;
-        // const splitSentences =
-        //   config?.splitSentences || defaultConfig.splitSentences;
-
         const method = "POST";
-        const inputText = setInputText(text, ignore);
-        const params = getConfig({ config, source, inputText, target });
+        const url = getURL({ text, target, source, options });
 
-        console.log("inputText", inputText);
+        const response = await fetch(url, { method, headers, body: null });
 
-        // let params = new URLSearchParams({
-        //   target_lang: target,
-        //   ignore_tags: ignoreTags as string,
-        //   tag_handling: tagHandling as DeepL.TagHandling,
-        //   formality: formality as DeepL.Formality,
-        //   split_sentences: splitSentences as DeepL.SplitSentences,
-        //   preserve_formatting: preserveFormatting as string,
-        // });
+        const json: DeepL.FetchResponse = await response.json();
+        const translations = parseResponse.deepL(json);
+        const result = getResult(translations, text, options);
 
-        // if (source) {
-        //   params.append("source_lang", source);
-        // }
-        // if (config) {
-        //   params = appendConfig(params, config);
-        // }
-
-        // params = appendConfig(params, {
-        //   formality,
-        //   tagHandling,
-        //   ignore,
-        //   splitSentences,
-        // });
-
-        // params = appendText(params, inputText);
-        // params.delete("ignoreRegex");
-
-        const apiUrl = new URL(endpoints.translate, baseUrl);
-        apiUrl.search = params.toString();
-
-        const response = await fetch(apiUrl, { method, headers });
-        const data: DeepLResponse = await response.json();
-
-        const output = getOutput(data, inputText, join);
-        return output;
+        return result;
       }
-      catch (error: any) {
-        const err = new Error(error.message);
-        return {
-          message: err.message,
-          stack: err.stack,
-          name: err.name,
-        };
+      catch (error) {
+        const e = error as Error;
+        throw new Error(e.message);
       }
     },
 
-    async usage() {
+    /**
+     * Checks the current usage of the DeepL API key.
+     * @async @function
+     * @returns {DeepL.UsageResponse} Returns an object containing the current usage of the DeepL API key.
+     * @throws {Error} Throws an error if there was an issue with the request.
+     *
+     * @example <caption>Get the current usage of the DeepL API key.</caption>
+     * const usage = await deepL.usage();
+     * console.log(usage);
+     * // {
+     * //   character_count: 0,
+     * //   character_limit: 5000000,
+     * // }
+     */
+
+    async usage(): DeepL.UsageResponse {
       const method = "GET";
       const endpoint = endpoints.usage;
       try {
@@ -179,8 +133,104 @@ export function makeDeepL(apiKey?: string) {
       }
       catch (error) {
         console.error(error);
-        return error;
+        const e = error as Error;
+        throw new Error(e.message);
       }
     },
   };
 }
+
+// type DeepLResponse = {
+//   translations: [{ text: string; detected_source_language: string }];
+// };
+
+// const camelToSnake = (str: string) => {
+//   return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+// };
+
+// const setJsonBody = (options: DeepL.Options) => {
+//   const customKeys = new Set([ "ignore", "join" ]);
+//   const json = Object.keys(options).reduce((body, key) => {
+//     const value = options[key];
+//     if (value !== undefined && !customKeys.has(key)) {
+//       body[camelToSnake(key)] = value;
+//     }
+//     return body;
+//   }, {} as DeepL.RequestBody);
+
+//   return json;
+// };
+
+// const removeExtraSpaces = (text: string[]) => {
+//   return text.map((t) => t.replace(/\s+/g, " ").trim());
+// };
+
+// const setTextArray = (text: string | string[]) => {
+//   return removeExtraSpaces(Array.isArray(text) ? text : [text]);
+// };
+
+// const options: Options = {
+//   target_lang: "EN",
+//   source_lang: "DE",
+//   formality: "prefer_less",
+//   tagHandling: "xml",
+//   splitSentences: "nonewlines",
+//   ignoreTags: ["ignore"],
+//   preserveFormatting: "0",
+// };
+
+// const getRequestBody = ({ text, target, source, options }: DeepL.Input) => {
+//   const json = setJsonBody({
+//     ...options,
+//     source_lang: source,
+//   } as DeepL.Options);
+
+//   const textArray = setInputText(text, options?.ignore);
+//   const body = { ...json, text: textArray, target_lang: target };
+//   return JSON.stringify(body);
+// };
+
+// const setDeepLSearchParams = (options: DeepL.Options) => {
+//   const customKeys = new Set([ "ignore", "join" ]);
+//   const params = new URLSearchParams();
+//   Object.keys(options).forEach((key) => {
+//     const value = options[key];
+//     const k = camelToSnake(key);
+//     if (!customKeys.has(key) && value !== undefined) {
+//       if (Array.isArray(value)) {
+//         value.forEach((item) => {
+//           params.append(k, item);
+//         });
+//       }
+//       else {
+//         params.set(k, value);
+//       }
+//     }
+//   });
+//   return params;
+// };
+
+// const getTranslation = (json: DeepLResponse) => {
+//   const translations = json.translations.map((t) => {
+//     return {
+//       detectedLanguage: t.detected_source_language,
+//       translation: t.text.replace(/<\/?ignore>/g, "").trim(),
+//     };
+//   });
+//   return translations;
+// };
+
+// const getOriginal = (text: string[]) => {
+//   return text.map((t) => t.replace(/<\/?ignore>/g, "").trim());
+// };
+
+// const getTranslationWithOriginal = (json: DeepLResponse, text: string[]) => {
+//   const translations = json.translations.map((t, i) => {
+//     return {
+//       detectedLanguage: t.detected_source_language,
+//       translation: t.text.replace(/<\/?ignore>/g, "").trim(),
+//       original: text[i].replace(/<\/?ignore>/g, "").trim(),
+//     };
+//   });
+//   return translations;
+// };

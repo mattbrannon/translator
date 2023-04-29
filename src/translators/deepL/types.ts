@@ -1,63 +1,42 @@
+import { Translate } from "../types";
+
 export namespace DeepL {
-  export type Input = {
-    text: string | string[];
-    target: string;
-    source?: string;
-  };
+  type Formality = "default" | "prefer_less" | "prefer_more" | "more" | "less";
+  type TagHandling = "xml" | "html";
+  type OnOff = "0" | "1";
+  type SplitSentences = "nonewlines" | OnOff;
 
-  export type IgnorePatterns = {
-    unicode?: string[];
-    regex?: RegExp[];
-  };
-
-  export type SourceLanguage = {
-    language: string;
-    name: string;
-  };
-
-  export type TargetLanguage = {
-    language: string;
-    name: string;
-    supports_formality: boolean;
-  };
-
-  export type UsageResponse = {
-    character_count: number;
-    character_limit: number;
-  };
-
-  export type Formality =
-    | "default"
-    | "prefer_less"
-    | "prefer_more"
-    | "more"
-    | "less";
-
-  export type TagHandling = "xml" | "html";
-  export type SplitSentences = "nonewlines" | "0" | "1";
-
-  export type Config = {
+  export interface Options extends Translate.Options {
+    target_lang?: string;
+    source_lang?: string;
     formality?: Formality;
     tagHandling?: TagHandling;
     splitSentences?: SplitSentences;
-    source_lang?: string;
-    ignoreTags?: string;
-    preserveFormatting?: "0" | "1";
-    ignore?: IgnorePatterns;
-    join?: boolean;
+    ignoreTags?: string[] | string;
+    preserveFormatting?: OnOff;
+    outlineDetection?: OnOff;
+    nonSplittingTags?: string[] | string;
+    splittingTags?: string[] | string;
+    glossaryId?: string;
+    [key: string]: any;
+  }
+
+  export interface Input extends Translate.Input {
+    options?: Options;
+  }
+
+  export type FetchResponse = {
+    translations: { text: string; detected_source_language: string }[];
   };
-  export type Response = [
-    {
-      translation: string;
-      detectedLanguage: string;
-      original: string;
-    }
-  ];
-  export type Translator = {
-    name: "deepL";
-    translate: (input: Input, config?: Config) => Promise<Response>;
-    sourceLanguages: () => Promise<[SourceLanguage]>;
-    targetLanguages: () => Promise<[TargetLanguage]>;
-    usage: () => Promise<UsageResponse>;
-  };
+
+  export type LanguageResponse = {
+    language: string;
+    name: string;
+    supports_formality?: boolean;
+  }[];
+
+  export type UsageResponse = Promise<{
+    character_count: number;
+    character_limit: number;
+  }>;
 }
