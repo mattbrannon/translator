@@ -37,22 +37,28 @@ const setIgnoreRegexes = (regexes: RegExp[]) => {
     .filter((v) => v);
 };
 
-const setIgnoreTags = (tags: RegExp[], texts: string[], name: string) => {
-  const result: string[] = [];
-  texts.forEach((text) => {
-    tags.forEach((tag) => {
-      const matches = text.match(tag);
+export const setIgnoreTags = (
+  text: string[],
+  options?: DeepL.Options | Microsoft.Options
+) => {
+  return text.map((str) => {
+    const regex = options?.ignore?.regex || [];
+    const unicodes = options?.ignore?.unicode || [];
+    const expressions = [
+      ...setIgnoreUnicodes(unicodes),
+      ...setIgnoreRegexes(regex),
+    ];
+    expressions.forEach((regex) => {
+      const matches = str.match(regex as RegExp);
       matches?.forEach((match) => {
-        const markup =
-          name === "deepl"
-            ? `<ignore>${match}</ignore>`
-            : `<span class="notranslate">${match}</span>`;
-        text = text.replace(match, markup);
+        const markup = options?.ignoreTags
+          ? `<ignore>${match}</ignore>`
+          : `<div class="notranslate">${match}</div>`;
+        str = str.replace(match, markup);
       });
     });
-    result.push(text);
+    return str;
   });
-  return result;
 };
 
 const removeTags = (text: string) => {
