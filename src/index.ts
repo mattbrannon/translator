@@ -1,8 +1,6 @@
 import { makeDeepLTranslator } from "./translators/deepL/translator";
 import { makeMicrosoftTranslator } from "./translators/microsoft/translator";
 import { makeGoogleTranslator } from "./translators/google/translator";
-// import { env } from "./env";
-// import type { DeepL } from "./translators/deepL/types";
 
 type ApiKeys = {
   microsoft?: string;
