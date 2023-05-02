@@ -23,5 +23,6 @@ export namespace Translate {
     transliteration?: string | null;
   };
 
+  export type ServiceName = "google" | "deepL" | "microsoft";
   export type Output = Promise<Response[] | string>;
 }
