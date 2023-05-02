@@ -20,6 +20,8 @@ export namespace Microsoft {
     options?: Options;
   }
 
+  export type Output = Promise<Translate.Output>;
+
   export type FetchResponse = {
     detectedLanguage: {
       language: string;
