@@ -1,63 +1,71 @@
 import type { Microsoft } from "./types";
-import type { Translate } from "../types";
-import { config } from "dotenv";
 import { env } from "../../env";
 import { v4 as uuidv4 } from "uuid";
 import {
   setSearchParams,
   createLanguageArray,
-  getRequestBody,
-  getResult,
   parseResponse,
+  makeMicrosoftFormatter,
+  makePostRequester,
+  makeGetRequester,
 } from "../utils";
 
-config({ path: ".env" });
-
 export function makeMicrosoftTranslator(apiKey?: string) {
-  const baseUrl = "https://api.cognitive.microsofttranslator.com";
-  const endpoints = {
-    detect: "/detect",
-    translate: "/translate",
-    transliterate: "/transliterate",
-    languages: "/languages",
-  };
+  const secretKey = apiKey || env.microsoft.apiKey;
 
-  const headers = {
-    "Ocp-Apim-Subscription-Key": apiKey as string,
+  if (!secretKey) return;
+
+  const baseUrl = env.microsoft.baseUrl;
+  const endpoints = env.microsoft.endpoints;
+
+  const headers = new Headers({
+    "Ocp-Apim-Subscription-Key": secretKey,
     "Ocp-Apim-Subscription-Region": env.microsoft.region,
     "Content-type": "application/json",
     "X-ClientTraceId": uuidv4().toString(),
-  };
+  });
+
+  const sendPostRequest = makePostRequester(headers);
+  const sendGetRequest = makeGetRequester(headers);
+
+  const params = new URLSearchParams({ "api-version": "3.0" });
 
   async function getLanguages(
     scope: "translation" | "transliteration" | "dictionary"
   ) {
-    const endpoint = endpoints.languages;
-    const url = new URL(endpoint, baseUrl);
-    const params = new URLSearchParams({
-      "api-version": "3.0",
-      scope: scope,
-    });
-
+    const url = new URL(endpoints.languages, baseUrl);
+    params.set("scope", scope);
     url.search = params.toString();
 
     try {
-      const response = await fetch(url);
-      const data = await response.json();
-      return data[scope];
+      const response = await sendGetRequest(url);
+      return response[scope];
     }
     catch (error) {
       console.error(error);
     }
   }
 
-  const getURL = async ({ target, source, options }: Microsoft.Input) => {
-    const url = new URL(endpoints.translate, baseUrl);
+  const getScripts = async (target: string) => {
     const languages = await getLanguages("transliteration");
     const languageArray = createLanguageArray(languages);
     const scripts = languageArray.find(
       (item: any) => item.languageCode === target
     );
+
+    return scripts;
+  };
+
+  const getURL = async ({ target, source, options }: Microsoft.Input) => {
+    const url = new URL(endpoints.translate, baseUrl);
+    const scripts = await getScripts(target);
+
+    const getTextType = () => {
+      const requiresTags = !!(
+        options?.ignore?.regex?.length || options?.ignore?.unicode?.length
+      );
+      return requiresTags ? "html" : options?.textType;
+    };
 
     const params = setSearchParams({
       "api-version": "3.0",
@@ -65,7 +73,7 @@ export function makeMicrosoftTranslator(apiKey?: string) {
       to: target,
       fromScript: scripts?.scripts[0],
       toScript: scripts?.scripts[1],
-      textType: options?.ignore ? "html" : undefined,
+      textType: getTextType(),
       ...options,
     });
 
@@ -89,25 +97,20 @@ export function makeMicrosoftTranslator(apiKey?: string) {
       },
     },
 
-    async translate({
-      text,
-      target,
-      source,
-      options,
-    }: Microsoft.Input): Promise<Translate.Output> {
-      const url = await getURL({ text, target, source, options });
-      const requestBody = getRequestBody(text, options);
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(requestBody),
-      });
+    async translate(input: Microsoft.Input): Microsoft.Output {
+      const text = Array.isArray(input.text) ? input.text : [input.text];
+      const options = input.options || {};
 
-      const json = await response.json();
-      const translations = parseResponse.microsoft(json);
-      const result = await getResult(translations, text, options);
+      const formatText = makeMicrosoftFormatter(options);
 
-      return result;
+      const requestBody = formatText(text);
+      const body = JSON.stringify(requestBody);
+
+      const url = await getURL(input);
+      const response = await sendPostRequest(url, body);
+
+      const translations = parseResponse.microsoft(response, text, options);
+      return translations;
     },
   };
 }
