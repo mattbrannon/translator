@@ -25,6 +25,8 @@ export namespace DeepL {
     options?: Options;
   }
 
+  export type Output = Translate.Output;
+
   export type FetchResponse = {
     translations: { text: string; detected_source_language: string }[];
   };
