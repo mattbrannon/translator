@@ -3,7 +3,7 @@ import { parseResponse, makePostRequester, makeGetRequester } from "../utils";
 import { setRequestBody } from "./helpers";
 import { env } from "../../env";
 
-export function makeDeepL(apiKey?: string) {
+export function makeDeepLTranslator(apiKey?: string) {
   const secretKey = apiKey || env.deepL.apiKey;
 
   if (!secretKey) return;
