@@ -146,7 +146,7 @@ export const formatDeepLResponse = (
 ) => {
   const translations = json.translations.map((t, i) => {
     return {
-      detectedLanguage: t.detected_source_language,
+      detectedLanguage: t.detected_source_language.toLowerCase(),
       translation: removeTags(t.text), //replace(/<\/?ignore>/g, "").trim(),
       original: text[i],
     };
