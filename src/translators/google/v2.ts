@@ -7,11 +7,7 @@ import {
   makeGetRequester,
 } from "../utils";
 
-export function makeV2Translator(apiKey?: string) {
-  const secretKey = apiKey || env.google.apiKey;
-
-  if (!secretKey) return;
-
+export function makeV2Translator(apiKey: string) {
   const headers = new Headers({
     "Content-Type": "application/json",
   });
@@ -24,7 +20,7 @@ export function makeV2Translator(apiKey?: string) {
     const endpoints = env.google.v2.endpoints;
 
     const url = new URL(endpoints[endpoint], baseUrl);
-    const params = new URLSearchParams({ key: secretKey });
+    const params = new URLSearchParams({ key: apiKey as string });
 
     url.search = params.toString();
 
@@ -37,6 +33,7 @@ export function makeV2Translator(apiKey?: string) {
 
   return {
     name: "google",
+    version: "v2",
 
     async translate({ text, target, source, options }: Google.Input) {
       text = Array.isArray(text) ? text : [text];
