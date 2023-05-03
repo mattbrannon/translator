@@ -2,7 +2,7 @@ import type { DeepL } from "./types";
 import { makeDeepLFormatter } from "../utils";
 
 const requiresTags = (options: DeepL.Options) => {
-  return !!(options?.ignore?.regex?.length || options?.ignore?.unicode?.length);
+  return !!options?.ignore?.length;
 };
 
 const setTagHandling = (options: DeepL.Options) => {

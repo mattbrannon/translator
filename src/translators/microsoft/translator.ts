@@ -57,9 +57,7 @@ export function makeMicrosoftTranslator(apiKey: string) {
     const scripts = await getScripts(target);
 
     const getTextType = () => {
-      const requiresTags = !!(
-        options?.ignore?.regex?.length || options?.ignore?.unicode?.length
-      );
+      const requiresTags = !!options?.ignore?.length;
       return requiresTags ? "html" : options?.textType;
     };
 

@@ -1,17 +1,7 @@
 export namespace Translate {
-  export type IgnorePatterns = {
-    unicode?: string[];
-    regex?: RegExp[];
-  };
-
-  // export interface Options {
-  //   ignore?: IgnorePatterns;
-  //   join?: boolean;
-  // }
-
-  export interface Options<T extends boolean = false> {
-    ignore?: IgnorePatterns;
-    join?: T;
+  export interface Options {
+    ignore?: RegExp[];
+    join?: boolean;
   }
 
   export interface Input {

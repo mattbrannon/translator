@@ -6,18 +6,18 @@ import type { Microsoft } from "./microsoft/types";
 //   return text.map((t) => t.replace(/\s+/g, " ").trim());
 // };
 
-const setIgnoreUnicodes = (unicodes: string[]) => {
-  return [...new Set([...unicodes])]
-    .map((unicode) => {
-      try {
-        return new RegExp(`\\p{${unicode}}`, "gu");
-      }
-      catch {
-        return null;
-      }
-    })
-    .filter((v) => v);
-};
+// const setIgnoreUnicodes = (unicodes: string[]) => {
+//   return [...new Set([...unicodes])]
+//     .map((unicode) => {
+//       try {
+//         return new RegExp(`\\p{${unicode}}`, "gu");
+//       }
+//       catch {
+//         return null;
+//       }
+//     })
+//     .filter((v) => v);
+// };
 
 const setIgnoreRegexes = (regexes: RegExp[]) => {
   return regexes
@@ -43,12 +43,13 @@ export const setIgnoreTags = (
   options?: Translate.Options
 ) => {
   return setTextArray(text).map((str) => {
-    const regex = options?.ignore?.regex || [];
-    const unicodes = options?.ignore?.unicode || [];
-    const expressions = [
-      ...setIgnoreUnicodes(unicodes),
-      ...setIgnoreRegexes(regex),
-    ];
+    const regex = options?.ignore || [];
+    // const unicodes = options?.ignore?.unicode || [];
+    // const expressions = [
+    //   // ...setIgnoreUnicodes(unicodes),
+    //   ...setIgnoreRegexes(regex),
+    // ];
+    const expressions = setIgnoreRegexes(regex);
     expressions.forEach((regex) => {
       const matches = [...new Set(str.match(regex as RegExp))];
 
