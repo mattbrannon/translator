@@ -50,14 +50,16 @@ export const setIgnoreTags = (
       ...setIgnoreRegexes(regex),
     ];
     expressions.forEach((regex) => {
-      const matches = str.match(regex as RegExp);
+      const matches = [...new Set(str.match(regex as RegExp))];
+
       matches?.forEach((match) => {
+        const re = new RegExp(match, "g");
         const markup =
           // @ts-ignore
           options?.tagHandling === "xml"
             ? `<ignore>${match}</ignore>`
             : `<span class="notranslate">${match}</span>`;
-        str = str.replace(match, markup);
+        str = str.replace(re, markup);
       });
     });
     return str;
