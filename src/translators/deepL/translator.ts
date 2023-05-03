@@ -3,16 +3,12 @@ import { parseResponse, makePostRequester, makeGetRequester } from "../utils";
 import { setRequestBody } from "./helpers";
 import { env } from "../../env";
 
-export function makeDeepLTranslator(apiKey?: string) {
-  const secretKey = apiKey || env.deepL.apiKey;
-
-  if (!secretKey) return;
-
+export function makeDeepLTranslator(apiKey: string) {
   const baseUrl = env.deepL.baseUrl;
   const endpoints = env.deepL.endpoints;
 
   const headers = new Headers({
-    Authorization: `DeepL-Auth-Key ${secretKey}`,
+    Authorization: `DeepL-Auth-Key ${apiKey}`,
     "Content-Type": "application/json",
   });
 
@@ -35,13 +31,14 @@ export function makeDeepLTranslator(apiKey?: string) {
       return await getLanguages("target");
     },
 
-    async translate(input: DeepL.Input): DeepL.Output {
+    async translate(input: DeepL.Input) {
       try {
         const text = Array.isArray(input.text) ? input.text : [input.text];
         const body = JSON.stringify(setRequestBody({ ...input, text }));
 
         const url = new URL(endpoints.translate, baseUrl);
         const response = await sendPostRequest(url, body);
+
         const translations = parseResponse.deepL(response, text, input.options);
 
         return translations;

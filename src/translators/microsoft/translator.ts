@@ -10,16 +10,12 @@ import {
   makeGetRequester,
 } from "../utils";
 
-export function makeMicrosoftTranslator(apiKey?: string) {
-  const secretKey = apiKey || env.microsoft.apiKey;
-
-  if (!secretKey) return;
-
+export function makeMicrosoftTranslator(apiKey: string) {
   const baseUrl = env.microsoft.baseUrl;
   const endpoints = env.microsoft.endpoints;
 
   const headers = new Headers({
-    "Ocp-Apim-Subscription-Key": secretKey,
+    "Ocp-Apim-Subscription-Key": apiKey,
     "Ocp-Apim-Subscription-Region": env.microsoft.region,
     "Content-type": "application/json",
     "X-ClientTraceId": uuidv4().toString(),
@@ -97,7 +93,7 @@ export function makeMicrosoftTranslator(apiKey?: string) {
       },
     },
 
-    async translate(input: Microsoft.Input): Microsoft.Output {
+    async translate(input: Microsoft.Input) {
       const text = Array.isArray(input.text) ? input.text : [input.text];
       const options = input.options || {};
 
@@ -110,6 +106,7 @@ export function makeMicrosoftTranslator(apiKey?: string) {
       const response = await sendPostRequest(url, body);
 
       const translations = parseResponse.microsoft(response, text, options);
+
       return translations;
     },
   };
