@@ -31,12 +31,13 @@ async function translateString(input: Google.Input) {
   const response: Google.V1FetchResponse = await sendGetRequest(endpoint);
 
   const [[[ translation, original ]], _, detectedLanguage ] = response;
-
-  return {
-    translation,
-    original,
-    detectedLanguage,
-  };
+  return [
+    {
+      translation,
+      original,
+      detectedLanguage,
+    },
+  ];
 }
 
 async function translateArray(input: {
