@@ -4,9 +4,14 @@ export namespace Translate {
     regex?: RegExp[];
   };
 
-  export interface Options {
+  // export interface Options {
+  //   ignore?: IgnorePatterns;
+  //   join?: boolean;
+  // }
+
+  export interface Options<T extends boolean = false> {
     ignore?: IgnorePatterns;
-    join?: boolean;
+    join?: T;
   }
 
   export interface Input {
