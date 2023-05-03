@@ -8,10 +8,14 @@ type ApiKeys = {
   google?: string;
 };
 
-export const makeTranslators = (apiKeys: ApiKeys) => {
-  const deepL = makeDeepLTranslator(apiKeys.deepL);
-  const microsoft = makeMicrosoftTranslator(apiKeys.microsoft);
-  const google = makeGoogleTranslator(apiKeys.google)!;
+export const makeTranslators = (apiKeys?: ApiKeys) => {
+  const deepLApiKey = process.env.DEEPL_API_KEY || apiKeys?.deepL;
+  const microsoftApiKey = process.env.MICROSOFT_API_KEY || apiKeys?.microsoft;
+  const googleApiKey = process.env.GOOGLE_API_KEY || apiKeys?.google;
+
+  const deepL = makeDeepLTranslator(deepLApiKey as string);
+  const microsoft = makeMicrosoftTranslator(microsoftApiKey as string);
+  const google = makeGoogleTranslator(googleApiKey); //as Google.Translator;
 
   return {
     deepL,
