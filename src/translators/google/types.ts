@@ -9,4 +9,5 @@ export namespace Google {
 
   export type Input = Translate.Input;
   export type Options = Translate.Options;
+  export type Output = Translate.Output;
 }
