@@ -107,7 +107,7 @@ type GoogleV2Response = {
   };
 };
 
-const joinTranslations = (translations: Translate.Response[]) => {
+const joinTranslations = (translations: Translate.Response) => {
   const result = translations
     .map((item) => removeTags(item.translation))
     .join(" ");
