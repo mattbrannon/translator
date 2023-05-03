@@ -44,12 +44,13 @@ async function translateArray(input: {
   text: string[];
   target: string;
   source?: string;
-}) {
+}): Promise<Google.Output> {
   const { text, target, source } = input;
-  const translations: any = await Promise.all(
-    text.map((text) => googleTranslate({ text, target, source }))
-  );
-  return translations;
+  return (
+    await Promise.all(
+      text.map((text) => googleTranslate({ text, target, source }))
+    )
+  ).flat(Infinity) as [];
 }
 
 export const makeV1Translator = () => {
