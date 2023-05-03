@@ -56,8 +56,20 @@ async function translateArray(input: {
 export const makeV1Translator = () => {
   return {
     name: "google",
+    version: "v1",
     async translate(input: Google.Input) {
+      if (input.options) {
+        console.warn(
+          "options are not supported in this version of the Google translator."
+        );
+      }
       return googleTranslate(input);
+    },
+    getLanguages() {
+      return "getLanguages() is not supported in this version of the Google translator.";
+    },
+    detectLanguage() {
+      return "detectLanguage() is not supported in this version of the Google translator.";
     },
   };
 };
