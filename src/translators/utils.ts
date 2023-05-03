@@ -66,7 +66,7 @@ export const setIgnoreTags = (
 
 export const removeTags = (text: string) => {
   return text
-    ?.replace(/<\/?[^>]+(>|$)/g, " ")
+    .replace(/\s(?=\p{P})|<\/?[^>]+(>|$)/gu, "") // replace tags and any whitespace before punctuation
     .replace(/\s+/g, " ")
     .trim();
 };
