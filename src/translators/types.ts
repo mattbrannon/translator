@@ -24,10 +24,14 @@ export namespace Translate {
   export type Response = {
     translation: string;
     detectedLanguage: string;
-    original?: string;
+    original: string;
     transliteration?: string | null;
-  };
+  }[];
 
   export type ServiceName = "google" | "deepL" | "microsoft";
-  export type Output = Promise<Response[] | string>;
+  // export type Output = Promise<Response | string>;
+
+  export type Output<T extends boolean = false> = Promise<
+    T extends true ? string : Response
+  >;
 }
