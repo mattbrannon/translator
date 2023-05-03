@@ -5,15 +5,15 @@ export const env = {
   deepL: {
     apiKey: process.env.DEEPL_API_KEY,
     baseUrl: process.env.DEEPL_API_KEY?.endsWith(":fx")
-      ? "https://api-free.deepl.com/v2"
-      : "https://api.deepl.com/v2",
+      ? "https://api-free.deepl.com"
+      : "https://api.deepl.com",
 
     active: !!process.env.DEEPL_API_KEY,
 
     endpoints: {
-      translate: "/translate",
-      languages: "/languages",
-      usage: "/usage",
+      translate: "/v2/translate",
+      languages: "/v2/languages",
+      usage: "/v2/usage",
     },
   },
   microsoft: {
