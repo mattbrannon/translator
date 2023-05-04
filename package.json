@@ -12,7 +12,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "rimraf dist && tsc"
+    "build": "rimraf dist && tsc",
+    "dev": "rimraf dist && tsc --sourceMap --declarationMap"
   },
   "repository": {
     "type": "git",
