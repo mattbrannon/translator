@@ -7,10 +7,10 @@
     "esModuleInterop": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "sourceMap": true,
     "removeComments": true,
     "declaration": true,
-    "declarationMap": true,
+    "declarationMap": false,
+    "sourceMap": false,
     "moduleDetection": "auto"
   },
   "include": ["src/**/*"],
