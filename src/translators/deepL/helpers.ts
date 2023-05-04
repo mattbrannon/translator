@@ -18,7 +18,6 @@ const setIgnoreTags = (options: DeepL.Options) => {
     : [ options.ignoreTags, "ignore" ];
 
   const tags = [...new Set(ignoreTags.filter((v) => v))];
-  console.log({ tags });
 
   return tags;
 };
