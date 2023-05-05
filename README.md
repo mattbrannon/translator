@@ -1,4 +1,4 @@
-## MultiTranslator
+## Translator
 
 This project aims to combine the functionality of multiple translation services into a single API. Each translation service requires an API key. You can get an API key for each translator at the following links:
 
@@ -23,13 +23,13 @@ You don't have to get an API key for every translation service. For example if y
 ## Installation
 
 ```bash
-npm install multi-translator
+npm install @mattbrannon/translator
 ```
 
 ## Usage
 
 ```js
-import { makeTranslators } from "multi-translator";
+import { makeTranslators } from "@mattbrannon/translator";
 const translators = makeTranslators({
   google: process.env.GOOGLE_API_KEY,
   microsoft: process.env.MICROSOFT_API_KEY,
